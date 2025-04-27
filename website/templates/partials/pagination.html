@@ -1,0 +1,13 @@
+<nav>
+    <ul class="pagination">
+        {% if pagination.has_prev %}
+            <li class="page-item"><a class="page-link" href="#" data-page="{{ pagination.prev_num }}">Previous</a></li>
+        {% endif %}
+        {% for page_num in pagination.iter_pages() %}
+            <li class="page-item {% if page_num == pagination.page %}active{% endif %}"><a class="page-link" href="#" data-page="{{ page_num }}">{{ page_num }}</a></li>
+        {% endfor %}
+        {% if pagination.has_next %}
+            <li class="page-item"><a class="page-link" href="#" data-page="{{ pagination.next_num }}">Next</a></li>
+        {% endif %}
+    </ul>
+</nav>

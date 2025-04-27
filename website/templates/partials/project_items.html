@@ -1,0 +1,11 @@
+{% for project in projects %}
+    <tr>
+        <td>{{ project.project_name }}</td>
+        <td><a href="{{ url_for('views.update_project_state', project_id=project.project_id) }}" >{{ project.state }}</a></td>
+        <td>{{ project.budget }}</td>
+        <td>{{ project.creation_date }}</td>
+        <td>{{ project.deadline_date }}</td>
+        <td>{{ project.user_name }} ({{ project.user_email }})</td>
+        <td><a href="{{ url_for('views.project_detail', project_id=project.project_id) }}" class="btn btn-primary">See More</a></td>
+    </tr>
+{% endfor %}

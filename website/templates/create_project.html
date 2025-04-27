@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block title %}Create Project{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2 class="mb-4 text-center">Create New Project</h2>
+    <form method="POST" action="">
+        {{ form.hidden_tag() }}
+        <div class="mb-3">
+            {{ form.project_name.label(class="form-label") }}
+            {{ form.project_name(class="form-control", size=64, placeholder="Enter project name") }}
+                {% for error in form.project_name.errors %}
+                    <span class="text-danger" >{{ error }}</span>
+                {% endfor %}
+        </div>
+        <div class="mb-3">
+            {{ form.description.label(class="form-label") }}
+            {{ form.description(class="form-control", cols=64, rows=5, placeholder="Enter project description") }}
+                {% for error in form.description.errors %}
+                    <span class="text-danger" >{{ error }}</span>
+                {% endfor %}
+        </div>
+        <div class="mb-3">
+            {{ form.budget.label(class="form-label") }}
+            {{ form.budget(class="form-control", placeholder="Enter project budget") }}
+                {% for error in form.budget.errors %}
+                    <span class="text-danger" >{{ error }}</span>
+                {% endfor %}
+        </div>
+        <div class="mb-3">
+            {{ form.deadline_date.label(class="form-label") }}
+            {{ form.deadline_date(class="form-control", placeholder="Enter deadline date") }}
+                {% for error in form.deadline_date.errors %}
+                    <span class="text-danger" >{{ error }}</span>
+                {% endfor %}
+        </div>
+        <button type="submit" class="btn btn-primary">{{ form.submit.label }}</button>
+    </form>
+</div>
+
+<style>
+    .container {
+        max-width: 600px;
+    }
+    .form-label {
+        font-weight: bold;
+    }
+    .form-control {
+        margin-bottom: 10px;
+    }
+    .btn {
+        margin-top: 20px;
+    }
+</style>
+{% endblock %}

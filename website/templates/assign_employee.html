@@ -1,0 +1,365 @@
+{% extends "base.html" %}
+
+{% block title %}Assign Employee{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2 class="mb-4">Assign Employee to Project</h2>
+
+    <form id="project-filter-form" class="mb-4">
+        <div class="form-row">
+            <div class="col-md-6 mb-3">
+                <label for="filter_project_name">Filter Projects by Name</label>
+                <input type="text" class="form-control" name="filter_project_name" id="filter_project_name" placeholder="Enter project name">
+            </div>
+            <div class="col-md-6 mb-3">
+                <label for="filter_project_state">Filter Projects by State</label>
+                <input type="text" class="form-control" name="filter_project_state" id="filter_project_state" placeholder="Enter project state">
+            </div>
+            <div class="col-md-6 mb-3">
+                <label for="filter_creation_date_after">Creation Date After</label>
+                <input type="date" class="form-control" name="filter_creation_date_after" id="filter_creation_date_after">
+            </div>
+            <div class="col-md-6 mb-3">
+                <label for="filter_creation_date_before">Creation Date Before</label>
+                <input type="date" class="form-control" name="filter_creation_date_before" id="filter_creation_date_before">
+            </div>
+            <div class="col-md-6 mb-3">
+                <label for="filter_deadline_after">Deadline After</label>
+                <input type="date" class="form-control" name="filter_deadline_after" id="filter_deadline_after">
+            </div>
+            <div class="col-md-6 mb-3">
+                <label for="filter_deadline_before">Deadline Before</label>
+                <input type="date" class="form-control" name="filter_deadline_before" id="filter_deadline_before">
+            </div>
+            <div class="col-md-6 mb-3">
+                <label for="filter_remaining_days">Remaining Days</label>
+                <input type="number" class="form-control" name="filter_remaining_days" id="filter_remaining_days" placeholder="Enter remaining days">
+            </div>
+        </div>
+        <button type="button" class="btn btn-primary" onclick="filterProjects()">Filter</button>
+    </form>
+
+    <form id="employee-filter-form" class="mb-4">
+        <div class="form-row">
+            <div class="col-md-6 mb-3">
+                <label for="filter_employee_name">Filter Employees by Name</label>
+                <input type="text" class="form-control" name="filter_employee_name" id="filter_employee_name" placeholder="Enter employee name">
+            </div>
+            <div class="col-md-6 mb-3">
+                <label for="filter_employee_rating">Filter Employees by Rating</label>
+                <input type="text" class="form-control" name="filter_employee_rating" id="filter_employee_rating" placeholder="Enter employee rating">
+            </div>
+            <div class="col-md-6 mb-3">
+                <label for="filter_employee_department">Filter Employees by Department</label>
+                <input type="text" class="form-control" name="filter_employee_department" id="filter_employee_department" placeholder="Enter employee department">
+            </div>
+            <div class="col-md-6 mb-3">
+                <label for="filter_employee_creation_date">Creation Date</label>
+                <input type="date" class="form-control" name="filter_employee_creation_date" id="filter_employee_creation_date">
+            </div>
+        </div>
+        <button type="button" class="btn btn-primary" onclick="filterEmployees()">Filter</button>
+    </form>
+
+    <form id="assign-employee-form" method="POST" action="{{ url_for('views.assign_employee') }}">
+        <h3>Select Project</h3>
+        <div class="table-responsive">
+            <table class="table table-hover mb-4" id="project-table">
+                <thead class="thead-light">
+                    <tr>
+                        <th>Select</th>
+                        <th>
+                            <a href="#" class="sort-link" data-sort-by="project_name" data-order="asc">▲</a>
+                            Project Name
+                            <a href="#" class="sort-link" data-sort-by="project_name" data-order="desc">▼</a>
+                        </th>
+                        <th>State</th>
+                        <th>
+                            <a href="#" class="sort-link" data-sort-by="budget" data-order="asc">▲</a>
+                            Budget
+                            <a href="#" class="sort-link" data-sort-by="budget" data-order="desc">▼</a>
+                        </th>
+                        <th>
+                            <a href="#" class="sort-link" data-sort-by="creation_date" data-order="asc">▲</a>
+                            Creation Date
+                            <a href="#" class="sort-link" data-sort-by="creation_date" data-order="desc">▼</a>
+                        </th>
+                        <th>
+                            <a href="#" class="sort-link" data-sort-by="deadline_date" data-order="asc">▲</a>
+                            Deadline Date
+                            <a href="#" class="sort-link" data-sort-by="deadline_date" data-order="desc">▼</a>
+                        </th>
+                        <th>Creator</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="project-tbody">
+                    <!-- Filled dynamically with JS -->
+                </tbody>
+            </table>
+        </div>
+        <nav>
+            <ul class="pagination" id="project-pagination">
+                <!-- Filled dynamically with JS -->
+            </ul>
+        </nav>
+
+        <h3>Select Employees</h3>
+        <div class="table-responsive">
+            <table class="table table-hover mb-4" id="employee-table">
+                <thead class="thead-light">
+                    <tr>
+                        <th>Select</th>
+                        <th>
+                            <a href="#" class="sort-link" data-sort-by="first_name" data-order="asc">▲</a>
+                            Employee Name
+                            <a href="#" class="sort-link" data-sort-by="first_name" data-order="desc">▼</a>
+                        </th>
+                        <th>Email</th>
+                        <th>
+                            <a href="#" class="sort-link" data-sort-by="rating" data-order="asc">▲</a>
+                            Rating
+                            <a href="#" class="sort-link" data-sort-by="rating" data-order="desc">▼</a>
+                        </th>
+                        <th>Department</th>
+                        <th>Creation Date</th>
+                    </tr>
+                </thead>
+                <tbody id="employee-tbody">
+                    <!-- Filled dynamically with JS -->
+                </tbody>
+            </table>
+        </div>
+        <nav>
+            <ul class="pagination" id="employee-pagination">
+                <!-- Filled dynamically with JS -->
+            </ul>
+        </nav>
+
+        <h3>Selected Employees</h3>
+        <div class="table-responsive">
+            <table class="table table-hover mb-4" id="selected-employee-table">
+                <thead class="thead-light">
+                    <tr>
+                        <th>Employee Name</th>
+                        <th>Email</th>
+                        <th>Rating</th>
+                        <th>Department</th>
+                        <th>Creation Date</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="selected-employee-tbody">
+                    <!-- Filled dynamically with JS -->
+                </tbody>
+            </table>
+        </div>
+
+        <button type="submit" name="assign" class="btn btn-success">Assign Employees</button>
+    </form>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        filterProjects();
+        filterEmployees();
+    });
+    
+    document.addEventListener('click', function(event) {
+        if (event.target.matches('.page-link')) {
+            event.preventDefault();
+            const page = event.target.getAttribute('data-page');
+            if (event.target.closest('#project-pagination')) {
+                filterProjects(page);
+            } else if (event.target.closest('#employee-pagination')) {
+                filterEmployees(page);
+            }
+        } else if (event.target.matches('.sort-link')) {
+            event.preventDefault();
+            const sortBy = event.target.getAttribute('data-sort-by');
+            const order = event.target.getAttribute('data-order');
+            if (event.target.closest('#project-table')) {
+                filterProjects(1, sortBy, order);
+            } else if (event.target.closest('#employee-table')) {
+                filterEmployees(1, sortBy, order);
+            }
+        }
+    });
+    
+    let assignedEmployeeIds = {{ assigned_employee_ids | tojson }};
+    let selectedProjectId = "{{ selected_project_id }}";
+    let detailedEmployeeData = {}; // added
+
+    function filterProjects(page = 1, sort_by = '', order = '') {
+        const formData = new FormData(document.getElementById('project-filter-form'));
+        formData.append('page', page);
+        if (sort_by) formData.append('sort_by', sort_by);
+        if (order) formData.append('order', order);
+        const params = new URLSearchParams(formData).toString();
+        fetch(`/filter_projects_ass?${params}`)
+            .then(response => response.json())
+            .then(data => updateProjectTable(data));
+    }
+    
+    function filterEmployees(page = 1, sort_by = '', order = '') {
+        const formData = new FormData(document.getElementById('employee-filter-form'));
+        formData.append('page', page);
+        if (sort_by) formData.append('sort_by', sort_by);
+        if (order) formData.append('order', order);
+        const params = new URLSearchParams(formData).toString();
+        fetch(`/filter_employees?${params}`)
+            .then(response => response.json())
+            .then(data => updateEmployeeTable(data));
+    }
+    
+    function updateProjectTable(data) {
+        const tbody = document.getElementById('project-tbody');
+        tbody.innerHTML = '';
+        data.projects.forEach(project => {
+            tbody.innerHTML += `
+                <tr>
+                    <td><input type="radio" name="project_id" value="${project.project_id}" ${selectedProjectId == project.project_id ? 'checked' : ''} onclick="selectProject(this)"></td>
+                    <td>${project.project_name}</td>
+                    <td>${project.state}</td>
+                    <td>${project.budget}</td>
+                    <td>${project.creation_date}</td>
+                    <td>${project.deadline}</td>
+                    <td>${project.creator_email}</td>
+                </tr>
+            `;
+        });
+        updatePagination('project-pagination', data.pagination, filterProjects);
+    }
+    
+    function updateEmployeeTable(data) {
+        const tbody = document.getElementById('employee-tbody');
+        tbody.innerHTML = '';
+        data.employees.forEach(employee => {
+            tbody.innerHTML += `
+                <tr>
+                    <td><input type="checkbox" name="employees" value="${employee.user_id}" ${assignedEmployeeIds.includes(employee.user_id) ? 'checked' : ''} onclick="toggleEmployee(this)"></td>
+                    <td>${employee.first_name} ${employee.last_name}</td>
+                    <td>${employee.email}</td>
+                    <td>${employee.rating}</td>
+                    <td>${employee.department_id}</td>
+                    <td>${employee.creation_date}</td>
+                </tr>
+            `;
+        });
+        updatePagination('employee-pagination', data.pagination, filterEmployees);
+    }
+    
+    function updatePagination(paginationId, paginationData, callback) {
+        const pagination = document.getElementById(paginationId);
+        pagination.innerHTML = '';
+    
+        if (paginationData.has_prev) {
+            pagination.innerHTML += `<li class="page-item"><a class="page-link" href="#" data-page="${paginationData.prev_num}" onclick="event.preventDefault(); ${callback.name}(${paginationData.prev_num})">Previous</a></li>`;
+        }
+    
+        for (let i = 1; i <= paginationData.pages; i++) {
+            pagination.innerHTML += `<li class="page-item ${paginationData.page === i ? 'active' : ''}"><a class="page-link" href="#" data-page="${i}" onclick="event.preventDefault(); ${callback.name}(${i})">${i}</a></li>`;
+        }
+    
+        if (paginationData.has_next) {
+            pagination.innerHTML += `<li class="page-item"><a class="page-link" href="#" data-page="${paginationData.next_num}" onclick="event.preventDefault(); ${callback.name}(${paginationData.next_num})">Next</a></li>`;
+        }
+    }
+    
+    function selectProject(radio) {
+        const projectId = radio.value;
+        selectedProjectId = projectId;
+        fetch(`/get_assigned_employees/${projectId}`)
+            .then(response => response.json())
+            .then(data => {
+                assignedEmployeeIds = data;
+                detailedEmployeeData = {};
+    
+                const fetchPromises = assignedEmployeeIds.map(employeeId => {
+                    return fetch(`/api/employee_info/${employeeId}`)
+                        .then(response => response.json())
+                        .then(employeeData => {
+                            detailedEmployeeData[employeeId] = employeeData;
+                        });
+                });
+    
+                // Wait for all fetches to complete
+                Promise.all(fetchPromises).then(() => {
+                    document.querySelectorAll('input[name="employees"]').forEach(checkbox => {
+                        checkbox.checked = assignedEmployeeIds.includes(parseInt(checkbox.value));
+                    });
+                    updateSelectedEmployeeTable();
+                }).catch(error => {
+                    console.error('Error fetching employee details:', error);
+                });
+            }).catch(error => {
+                console.error('Error fetching assigned employees:', error);
+            });
+    }
+    
+    function toggleEmployee(checkbox) {
+        const employeeId = parseInt(checkbox.value);
+        if (checkbox.checked) {
+            fetch (`/api/employee_info/${employeeId}`)
+            .then(response => response.json())
+            .then(data => {
+                detailedEmployeeData[employeeId] = data;
+                assignedEmployeeIds.push(employeeId);
+                updateSelectedEmployeeTable();
+            });
+        } else {
+            const index = assignedEmployeeIds.indexOf(employeeId);
+            if (index > -1) {
+                assignedEmployeeIds.splice(index, 1);
+                delete detailedEmployeeData[employeeId];
+                updateSelectedEmployeeTable();
+            }
+        }
+    }
+    
+    function updateSelectedEmployeeTable() {
+        const tbody = document.getElementById('selected-employee-tbody');
+        tbody.innerHTML = '';
+        assignedEmployeeIds.forEach(employeeId => {
+            const employee = detailedEmployeeData[employeeId];
+
+            tbody.innerHTML += `
+                <tr>
+                    <input type="hidden" name="employeesSelected" value="${employeeId}"> <!-- added was not before  --> 
+                    <td>${employee.first_name} ${employee.last_name}</td>
+                    <td>${employee.user_email}</td>
+                    <td>${employee.rating}</td>
+                    <td>${employee.department_id}</td>
+                    <td>${employee.creation_date}</td>
+                    <td><button type="button" class="btn btn-danger" onclick="removeEmployee(${employeeId})">Remove</button></td>
+                </tr>
+            `;
+        });
+    }
+    
+    function removeEmployee(employeeId) {
+        const checkbox = document.querySelector(`input[name="employees"][value="${employeeId}"]`);
+        if (checkbox) {
+            checkbox.checked = false;
+            toggleEmployee(checkbox);
+
+        }
+        else {
+            const index = assignedEmployeeIds.indexOf(employeeId);
+            if (index > -1) {
+                assignedEmployeeIds.splice(index, 1);
+                delete detailedEmployeeData[employeeId];
+                updateSelectedEmployeeTable();
+            }
+        }
+    }
+    
+    document.getElementById('assign-employee-form').addEventListener('submit', function(event) {
+        if (!selectedProjectId) {
+            event.preventDefault();
+            alert('Please select a project before assigning employees.');
+        }
+    });
+    </script>
+{% endblock %}

@@ -1,0 +1,171 @@
+{% extends "base.html" %}
+
+{% block title %}Notes{% endblock %}
+
+{% block content %}
+<div class="container mt-5" >
+
+    <form method="POST" action="{{ url_for('views.send_note') }}" class="mb-5"  >
+        <div class="form-group">
+            <label for="receiver_email">Receiver Email</label>
+            <input type="email" class="form-control" name="receiver_email" id="receiver_email" required>
+        </div>
+        <div class="form-group">
+            <label for="project_id">Project</label>
+            <input type="number" class="form-control" name="project_id" id="project_id" required>
+        </div>
+        <div class="form-group">
+            <label for="note_description">Note</label>
+            <textarea class="form-control" name="note_description" id="note_description" rows="3" required></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary">Send Note</button>
+    </form>
+
+
+
+    <h2 class="mb-4">Notes</h2>
+
+    <form id="note-filter-form" class="mb-4">
+        <div class="form-row">
+            <div class="col-md-6 mb-3">
+                <label for="filter_creation_date_start">Filter by Start Date</label>
+                <input type="date" class="form-control" name="filter_creation_date_start" id="filter_creation_date_start">
+            </div>
+            <div class="col-md-6 mb-3">
+                <label for="filter_creation_date_end">Filter by End Date</label>
+                <input type="date" class="form-control" name="filter_creation_date_end" id="filter_creation_date_end">
+            </div>
+            <div class="col-md-6 mb-3">
+                <label for="filter_receiver_email">Filter by Receiver Email</label>
+                <input type="text" class="form-control" name="filter_receiver_email" id="filter_receiver_email" placeholder="Enter receiver email">
+            </div>
+            <div class="col-md-6 mb-3">
+                <label for="filter_sender_email">Filter by Sender Email</label>
+                <input type="text" class="form-control" name="filter_sender_email" id="filter_sender_email" placeholder="Enter sender email">
+            </div>
+            <div class="col-md-6 mb-3">
+                <label for="filter_project_id">Filter by Project ID</label>
+                <input type="number" class="form-control" name="filter_project_id" id="filter_project_id" placeholder="Enter project ID">
+            </div>
+        </div>
+        <button type="button" class="btn btn-primary" onclick="filterNotes()">Filter</button>
+    </form>
+
+    <div class="table-responsive">
+        <table class="table table-hover mb-4" id="notes-table">
+            <thead class="thead-light">
+                <tr>
+                    <th>Content</th>
+                    <th>
+                        <a href="#" class="sort-link" data-sort-by="creation_date" data-order="asc">▲</a>
+                        Creation Date
+                        <a href="#" class="sort-link" data-sort-by="creation_date" data-order="desc">▼</a>
+                    </th>
+                    <th>Sender Email</th>
+                    <th>Receiver Email</th>
+                    <th>Project ID</th>
+                </tr>
+            </thead>
+            <tbody id="notes-tbody">
+                <!-- Filled dynamically with JS -->
+            </tbody>
+        </table>
+    </div>
+    <nav>
+        <ul class="pagination" id="notes-pagination">
+            <!-- Filled dynamically with JS -->
+        </ul>
+    </nav>
+</div>
+
+<script>
+    function filterNotes(i = 1) {
+        console.log(i);
+        console.log('Filtering notes');
+        const pageParam = `page=${i}`;
+        
+        const formData = new FormData(document.getElementById('note-filter-form'));
+        let params = new URLSearchParams(formData).toString();
+        params = `/notes_view?${params}&${pageParam}`;
+        fetch(`/notes_view?${params}`)
+            .then(response => response.json())
+            .then(data => updateNotesTable(data));
+    }
+
+    function updateNotesTable(data) {
+        const tbody = document.getElementById('notes-tbody');
+        tbody.innerHTML = '';
+        data.notes.forEach(note => {
+            tbody.innerHTML += `
+                <tr>
+                    <td>${note.content}</td>
+                    <td>${note.creation_date}</td>
+                    <td>${note.sender}</td>
+                    <td>${note.receiver}</td>
+                    <td>${note.project_id}</td>
+                </tr>
+            `;
+        });
+        updatePagination('notes-pagination', data.pagination, filterNotes);
+    }
+
+    function updatePagination(paginationId, paginationData, callback) {
+        const pagination = document.getElementById(paginationId);
+        pagination.innerHTML = '';
+
+        if (paginationData.has_prev) {
+            pagination.innerHTML += `<li class="page-item"><a class="page-link" href="#" onclick="event.preventDefault(); ${callback.name}(${paginationData.prev_num})">Previous</a></li>`;
+        }
+
+        for (let i = 1; i <= paginationData.pages; i++) {
+            pagination.innerHTML += `<li class="page-item ${paginationData.page === i ? 'active' : ''}"><a class="page-link" href="#" onclick="event.preventDefault(); ${callback.name}(${i})">${i}</a></li>`;
+        }
+
+        if (paginationData.has_next) {
+            pagination.innerHTML += `<li class="page-item"><a class="page-link" href="#" onclick="event.preventDefault(); ${callback.name}(${paginationData.next_num})">Next</a></li>`;
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        filterNotes();
+    });
+
+
+    document.querySelectorAll('.sort-link').forEach(link => {
+        link.addEventListener('click', function(event) {
+            event.preventDefault();
+            const sortBy = this.dataset.sortBy;
+            const order = this.dataset.order;
+            const form = document.getElementById('note-filter-form');
+            
+            // Remove existing sort_by and sort_order inputs
+            const existingSortByInput = form.querySelector('input[name="sort_by"]');
+            if (existingSortByInput) {
+                form.removeChild(existingSortByInput);
+            }
+            const existingOrderInput = form.querySelector('input[name="sort_order"]');
+            if (existingOrderInput) {
+                form.removeChild(existingOrderInput);
+            }
+
+            // Add new sort_by and sort_order inputs
+            const sortByInput = document.createElement('input');
+            sortByInput.setAttribute('type', 'hidden');
+            sortByInput.setAttribute('name', 'sort_by');
+            sortByInput.setAttribute('value', sortBy);
+            form.appendChild(sortByInput);
+
+            const orderInput = document.createElement('input');
+            orderInput.setAttribute('type', 'hidden');
+            orderInput.setAttribute('name', 'sort_order');
+            orderInput.setAttribute('value', order);
+            form.appendChild(orderInput);
+
+            filterNotes();
+        });
+    });
+
+
+
+</script>
+{% endblock %}

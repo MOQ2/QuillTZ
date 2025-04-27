@@ -1,0 +1,21 @@
+
+{% extends "base.html" %}
+
+{% block title %}Update Project State{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2 class="mb-4">Update State for Project: {{ project.project_name }}</h2>
+    <form method="POST" action="" class="needs-validation" novalidate>
+        {{ form.hidden_tag() }}
+        <div class="mb-3">
+            <label for="state" class="form-label">{{ form.state.label }}</label>
+            {{ form.state(class="form-control", id="state") }}
+            <div class="invalid-feedback">
+                {{ form.state.errors }}
+            </div>
+        </div>
+        <button type="submit" class="btn btn-primary">{{ form.submit() }}</button>
+    </form>
+</div>
+{% endblock %}

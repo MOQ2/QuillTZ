@@ -1,0 +1,30 @@
+# Core Flask dependencies
+Flask==2.3.3
+Werkzeug==2.3.7
+Jinja2==3.1.2
+
+# Database
+Flask-SQLAlchemy==3.1.1
+SQLAlchemy==2.0.21
+mysqlclient==2.2.0
+PyMySQL==1.1.0
+
+# Authentication & Security
+Flask-Login==0.6.2
+Flask-Bcrypt==1.0.1
+Flask-WTF==1.1.1
+email-validator==2.0.0
+
+# Forms
+WTForms==3.0.1
+
+# File Upload
+python-dotenv==1.0.0
+
+# Testing
+pytest==7.4.2
+pytest-flask==1.2.0
+
+# Utilities
+itsdangerous==2.1.2
+click==8.1.7

@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+
+{% block title %}Edit Profile{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2 class="text-center mb-4">Edit Profile</h2>
+    <form method="POST" action="" class="shadow p-4 rounded" id="edit-profile-form">
+        {{ form.hidden_tag() }}
+        <div class="form-group">
+            <label for="first_name">{{ form.first_name.label }}</label>
+            {{ form.first_name(class_="form-control", size=32) }}
+            <div class="invalid-feedback">{{ form.first_name.errors }}</div>
+        </div>
+        <div class="form-group">
+            <label for="last_name">{{ form.last_name.label }}</label>
+            {{ form.last_name(class_="form-control", size=32) }}
+            <div class="invalid-feedback">{{ form.last_name.errors }}</div>
+        </div>
+        <div class="form-group">
+            <label for="email">{{ form.email.label }}</label>
+            {{ form.email(class_="form-control", size=64) }}
+            <div class="invalid-feedback">{{ form.email.errors }}</div>
+        </div>
+        <div class="form-group">
+            <label for="password">{{ form.password.label }} <small>(leave blank if not changing)</small></label>
+            {{ form.password(class_="form-control", size=32, required=False) }}
+            <div class="invalid-feedback">{{ form.password.errors }}</div>
+        </div>
+        <button type="submit" class="btn btn-primary">Save Changes</button>
+    </form>
+</div>
+
+<!-- Custom CSS -->
+<style>
+    .container {
+        max-width: 600px;
+    }
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+    .btn-primary {
+        background-color: #007bff;
+        border-color: #007bff;
+    }
+    .btn-primary:hover {
+        background-color: #0056b3;
+        border-color: #0056b3;
+    }
+    .shadow {
+        box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    }
+    .invalid-feedback {
+        display: block;
+    }
+</style>
+
+<!-- Custom JavaScript -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.getElementById('edit-profile-form');
+
+        form.addEventListener('submit', function(event) {
+            let isValid = true;
+            const fields = form.querySelectorAll('.form-control');
+            
+            // Validate each field except password
+            fields.forEach(field => {
+                if (field.name !== 'password' && !field.value.trim()) {
+                    field.classList.add('is-invalid');
+                    isValid = false;
+                } else {
+                    field.classList.remove('is-invalid');
+                }
+            });
+
+            // Allow password field to be empty
+            const passwordField = form.querySelector('input[name="password"]');
+            if (passwordField.value.trim() && passwordField.value.length < 6) {
+                passwordField.classList.add('is-invalid');
+                isValid = false;
+            } else {
+                passwordField.classList.remove('is-invalid');
+            }
+
+            // Prevent form submission if any field is invalid
+            if (!isValid) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+        });
+    });
+</script>
+{% endblock %}

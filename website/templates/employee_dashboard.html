@@ -1,0 +1,183 @@
+{% extends "base.html" %}
+
+{% block title %}Employee Dashboard{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2 class="mb-4 text-center">Your Projects</h2>
+
+    <form id="filter-form" class="mb-4">
+        <div class="form-row">
+            <div class="col-md-3 mb-3">
+                <label for="state">Filter by State</label>
+                <input type="text" class="form-control" name="state" id="state" placeholder="Enter project state" value="{{ state_filter }}">
+            </div>
+            <div class="col-md-3 mb-3">
+                <label for="min_budget">Min Budget</label>
+                <input type="number" class="form-control" name="min_budget" id="min_budget" placeholder="Enter min budget" value="{{ min_budget }}">
+            </div>
+            <div class="col-md-3 mb-3">
+                <label for="max_budget">Max Budget</label>
+                <input type="number" class="form-control" name="max_budget" id="max_budget" placeholder="Enter max budget" value="{{ max_budget }}">
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="col-md-3 mb-3">
+                <label for="deadline_before">Deadline Before</label>
+                <input type="date" class="form-control" name="deadline_before" id="deadline_before" value="{{ deadline_before }}">
+            </div>
+            <div class="col-md-3 mb-3">
+                <label for="deadline_after">Deadline After</label>
+                <input type="date" class="form-control" name="deadline_after" id="deadline_after" value="{{ deadline_after }}">
+            </div>
+            <div class="col-md-3 mb-3">
+                <label for="remaining_days">Remaining Days</label>
+                <input type="number" class="form-control" name="remaining_days" id="remaining_days" placeholder="Enter remaining days" value="{{ remaining_days }}">
+            </div>
+        </div>
+        <button type="submit" class="btn btn-primary">Filter</button>
+    </form>
+
+    <div class="table-responsive">
+        <table class="table table-hover mb-4">
+            <thead class="thead-light">
+                <tr>
+                    <th>
+                        <a href="#" class="sort-link" data-sort-by="project_name" data-order="asc">▲</a>
+                        Project Name
+                        <a href="#" class="sort-link" data-sort-by="project_name" data-order="desc">▼</a>
+                    </th>
+                    <th>State</th>
+                    <th>
+                        <a href="#" class="sort-link" data-sort-by="budget" data-order="asc">▲</a>
+                        Budget
+                        <a href="#" class="sort-link" data-sort-by="budget" data-order="desc">▼</a>
+                    </th>
+                    <th>
+                        <a href="#" class="sort-link" data-sort-by="creation_date" data-order="asc">▲</a>
+                        Creation Date
+                        <a href="#" class="sort-link" data-sort-by="creation_date" data-order="desc">▼</a>
+                    </th>
+                    <th>
+                        <a href="#" class="sort-link" data-sort-by="deadline_date" data-order="asc">▲</a>
+                        Deadline Date
+                        <a href="#" class="sort-link" data-sort-by="deadline_date" data-order="desc">▼</a>
+                    </th>
+                    <th>Creator</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody id="project-items">
+                {% include 'partials/project_items.html' %}
+            </tbody>
+        </table>
+    </div>
+
+    <div id="pagination-controls" class="d-flex justify-content-center">
+        {% include 'partials/pagination.html' %}
+    </div>
+
+    <h2 class="mb-4 mt-5 text-center">Recent Feedbacks</h2>
+    <div class="list-group mb-5">
+        {% for feedback in feedbacks %}
+            <div class="list-group-item list-group-item-action">
+                <h5 class="mb-1"><strong>{{ feedback.user }}</strong> - Rating: {{ feedback.rating }}</h5>
+                <p class="mb-1">{{ feedback.feedback_description }}</p>
+                <small class="text-muted"><strong>Project:</strong> {{ feedback.project_id }} {{feedback.project_name}} | <strong>Date:</strong> {{ feedback.creation_date }}</small>
+            </div>
+        {% endfor %}
+    </div>
+
+    <h2 class="mb-4 text-center">Recent Notes</h2>
+    <div class="list-group mb-5">
+        {% for note in notes %}
+            <div class="list-group-item list-group-item-action">
+                <h5 class="mb-1"><strong>From: {{ note.sender }}</strong> <> <strong>To: {{ note.receiver }}</strong> </h5>
+                <p class="mb-1">{{ note.note_description }}</p>
+                <small class="text-muted"><strong>Project:</strong> {{ note.project_name }} | <strong>Date:</strong> {{ note.creation_date }}</small>
+            </div>
+        {% endfor %}
+    </div>
+
+    <h2 class="mb-4 text-center">Send Note</h2>
+    <form method="POST" action="{{ url_for('views.send_note') }}" class="mb-5">
+        <div class="form-group">
+            <label for="receiver_email">Receiver Email</label>
+            <input type="email" class="form-control" name="receiver_email" id="receiver_email" required>
+        </div>
+        <div class="form-group">
+            <label for="project_id">Project</label>
+            <select class="form-control" name="project_id" id="project_id" required>
+                {% for project in projects.items %}
+                    <option value="{{ project.project_id }}">{{ project.project_name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="note_description">Note</label>
+            <textarea class="form-control" name="note_description" id="note_description" rows="3" required></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary">Send Note</button>
+    </form>
+
+    <h2 class="mb-4 text-center">Add File to Project</h2>
+    <form method="POST" action="{{ url_for('views.add_file') }}" enctype="multipart/form-data" class="mb-5">
+        <div class="form-group">
+            <label for="project_id_file">Project</label>
+            <select class="form-control" name="project_id" id="project_id_file" required>
+                {% for project in projects.items %}
+                    <option value="{{ project.project_id }}">{{ project.project_name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="file">File</label>
+            <input type="file" class="form-control-file" name="file" id="file" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Add File</button>
+    </form>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const filterForm = document.getElementById('filter-form');
+        const projectItems = document.getElementById('project-items');
+        const paginationControls = document.getElementById('pagination-controls');
+
+        function fetchProjects(params = {}) {
+            const url = new URL('{{ url_for("views.filter_projects") }}', window.location.origin);
+            Object.keys(params).forEach(key => url.searchParams.append(key, params[key]));
+
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    projectItems.innerHTML = data.project_items_html;
+                    paginationControls.innerHTML = data.pagination_html;
+                });
+        }
+
+        filterForm.addEventListener('submit', function(event) {
+            event.preventDefault();
+            const formData = new FormData(filterForm);
+            const params = {};
+            formData.forEach((value, key) => { if (value) params[key] = value; });
+            fetchProjects(params);
+        });
+
+        document.addEventListener('click', function(event) {
+            if (event.target.matches('.page-link')) {
+                event.preventDefault();
+                const page = event.target.getAttribute('data-page');
+                const params = Object.fromEntries(new URLSearchParams(new FormData(filterForm)));
+                fetchProjects({ ...params, page });
+            } else if (event.target.matches('.sort-link')) {
+                event.preventDefault();
+                const sortBy = event.target.getAttribute('data-sort-by');
+                const order = event.target.getAttribute('data-order');
+                const params = Object.fromEntries(new URLSearchParams(new FormData(filterForm)));
+                fetchProjects({ ...params, sort_by: sortBy, order });
+            }
+        });
+    });
+</script>
+{% endblock %}

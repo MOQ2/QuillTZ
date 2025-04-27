@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+
+{% block title %}Manager Dashboard{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2 class="mb-4 text-center">Manager Dashboard</h2>
+    <div class="row mb-4">
+        <div class="col-md-12 text-center">
+            <a href="{{ url_for('views.assign_employee') }}" class="btn btn-primary btn-lg">Assign Employee to Project</a>
+        </div>
+    </div>
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card text-white bg-primary shadow-sm mb-3">
+                <div class="card-header">Total Budget of All Projects</div>
+                <div class="card-body">
+                    <h5 class="card-title display-6">${{ total_budget }}</h5>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card text-white bg-success shadow-sm mb-3">
+                <div class="card-header">Best Employee</div>
+                <div class="card-body">
+                    {% if not best_employee %}
+                        <p class="card-text">You are the best employee!</p>
+                    {% else %}
+                        <p class="card-text">{{ best_employee.first_name }} {{ best_employee.last_name }} <a class="btn btnMaterial btn-flat primary semicircle" role="button" href="{{ url_for('views.manager_employee_detail',employee_id = best_employee.user_id) }}" style="color: rgb(255,255,255);"> ({{ best_employee.user_email }})</a> - Rating: {{ best_employee.rating }}</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card text-white bg-warning shadow-sm mb-3">
+                <div class="card-header">Total Budget of Each Department</div>
+                <div class="card-body">
+                    <ul class="list-group list-group-flush">
+                        {% for dept, budget in department_budgets.items() %}
+                            <li class="list-group-item bg-warning text-dark">{{ dept }} : ${{ budget  }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card shadow-sm mb-3">
+                <div class="card-header bg-secondary text-white">Recent Clients</div>
+                <div class="card-body">
+                    <ul class="list-group list-group-flush">
+                        {% for client in recent_clients %}
+                            <li class="list-group-item">{{ client.first_name }} {{ client.last_name }} <a class="btn btnMaterial btn-flat primary semicircle" role="button" href="{{ url_for('views.client_detail',client_id = client.user_id ) }}" style="color: #00bdff;">({{ client.user_email }})</a></li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card shadow-sm mb-3">
+                <div class="card-header bg-secondary text-white">Recent Employees</div>
+                <div class="card-body">
+                    <ul class="list-group list-group-flush">
+                        {% for employee in recent_employees %}
+                            <li class="list-group-item">{{ employee.first_name }} {{ employee.last_name }} <a class="btn btnMaterial btn-flat primary semicircle" role="button" href="{{ url_for('views.manager_employee_detail',employee_id = employee.user_id) }}" style="color: #00bdff;"> ({{ employee.user_email }})</a></li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card shadow-sm mb-3">
+                <div class="card-header bg-info text-white">Recent Projects</div>
+                <div class="card-body">
+                    <ul class="list-group list-group-flush">
+                        {% for project in recent_projects %}
+                            <li class="list-group-item">
+                                <strong><a class="btn btnMaterial btn-flat primary semicircle" role="button" href="{{ url_for('views.manager_project_detail',project_id = project.project_id) }}" style="color: #00bdff;">{{ project.project_name }}</a></strong><br>
+                                Budget: ${{ project.budget }}<br>
+                                Start Date: {{ project.creation_date }}<br>
+                                Creator: {{ project.user_email }}<br>
+                                End Date: {{ project.deadline_date }}<br>
+                                Description: {{ project.description }}
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    
+</div>
+
+<style>
+    .card {
+        border-radius: 10px;
+    }
+    .card-header {
+        font-weight: bold;
+        font-size: 1.2rem;
+    }
+    .card-body {
+        font-size: 1rem;
+    }
+    .list-group-item {
+        font-size: 1rem;
+    }
+    .btn {
+        font-size: 1.2rem;
+    }
+    .bg-warning .list-group-item {
+        background-color: #fff3cd;
+    }
+</style>
+{% endblock %}

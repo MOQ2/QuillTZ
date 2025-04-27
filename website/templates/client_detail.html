@@ -1,0 +1,454 @@
+{% extends "base.html" %}
+
+{% block title %}Client Details{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
+{% endblock %}
+
+{% block content %}
+<!-- Modal HTML -->
+<div class="modal" id="descriptionModal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Description</h5>
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p id="modalDescription"></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container mt-5">
+    <!-- Client Summary Report -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <h3 class="card-title">Client Summary</h3>
+            <div class="row">
+                <div class="col-md-4">
+                    <p><strong>Name:</strong> {{ client.first_name }} {{ client.last_name }}</p>
+                    <p><strong>Email:</strong> {{ client.email }}</p>
+                    <p><strong>ID:</strong> {{ client.user_id }}</p>
+                </div>
+                <div class="col-md-4">
+                    <p><strong>Total Projects:</strong> <span id="total_projects"></span></p>
+                    <p><strong>Total Budget of Projects:</strong> $<span id="total_budget"></span></p>
+                </div>
+                <div class="col-md-4">
+                    <p><strong>Total Feedbacks:</strong> <span id="total_feedbacks"></span></p>
+                    <p><strong>Avg Rating of Projects:</strong> <span id="avg_feedback"></span></p>
+                    <p><strong>Total Notes:</strong> <span id="total_notes"></span></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Projects Section -->
+    <div class="card shadow-sm mt-4">
+        <div class="card-body">
+            <h3 class="card-title">Projects</h3>
+            <form id="projects-filter-form" method="GET">
+                <div class="form-row">
+                    <div class="col-md-3 mb-3">
+                        <label for="filter_start_creation_date">Start Creation Date</label>
+                        <input type="date" class="form-control" name="start_creation_date" id="filter_start_creation_date">
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label for="filter_end_creation_date">End Creation Date</label>
+                        <input type="date" class="form-control" name="end_creation_date" id="filter_end_creation_date">
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label for="filter_start_deadline_date">Start Deadline Date</label>
+                        <input type="date" class="form-control" name="start_deadline_date" id="filter_start_deadline_date">
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label for="filter_end_deadline_date">End Deadline Date</label>
+                        <input type="date" class="form-control" name="end_deadline_date" id="filter_end_deadline_date">
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label for="filter_remaining_days">Remaining Days</label>
+                        <input type="number" class="form-control" name="remaining_days" id="filter_remaining_days">
+                    </div>
+                    <div class="col-md-3 align-self-end">
+                        <button type="submit" class="btn btn-primary">Filter</button>
+                    </div>
+                </div>
+            </form>
+            <div class="table-responsive">
+                <table class="table table-hover" id="projects-table">
+                    <thead class="thead-light">
+                        <tr>
+                            <th data-sort="project_id">ID <button class="sort-button" data-field="project_id">Sort</button></th>
+                            <th data-sort="project_name">Name <button class="sort-button" data-field="project_name">Sort</button></th>
+                            <th data-sort="state">State <button class="sort-button" data-field="state">Sort</button></th>
+                            <th data-sort="budget">Budget <button class="sort-button" data-field="budget">Sort</button></th>
+                            <th data-sort="creation_date">Creation Date <button class="sort-button" data-field="creation_date">Sort</button></th>
+                            <th data-sort="deadline_date">Deadline Date <button class="sort-button" data-field="deadline_date">Sort</button></th>
+                            <th data-sort="creator_user">Creator</th>
+                        </tr>
+                    </thead>
+                    <tbody id="projects-table-body">
+                        <!-- Filled dynamically by JavaScript -->
+                    </tbody>
+                </table>
+                <nav>
+                    <ul class="pagination" id="projects-pagination">
+                        <!-- Pagination links will be added here dynamically by JavaScript -->
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </div>
+
+    <!-- Feedbacks Section -->
+    <div class="card shadow-sm mt-4">
+        <div class="card-body">
+            <h3 class="card-title">Feedbacks</h3>
+            <form id="feedbacks-filter-form" method="GET">
+                <div class="form-row">
+                    <div class="col-md-3 mb-3">
+                        <label for="feedback_project_id">Project ID</label>
+                        <input type="text" class="form-control" name="project_id" id="feedback_project_id" placeholder="Enter project ID">
+                    </div>
+                    <div class="col-md-3 align-self-end">
+                        <button type="submit" class="btn btn-primary">Filter</button>
+                    </div>
+                </div>
+            </form>
+            <div class="table-responsive">
+                <table class="table table-hover" id="feedbacks-table">
+                    <thead class="thead-light">
+                        <tr>
+                            <th data-sort="project_id">Project ID <button class="sort-button" data-field="project_id">Sort</button></th>
+                            <th data-sort="rating">Rating <button class="sort-button" data-field="rating">Sort</button></th>
+                            <th data-sort="feedback_description">Description <button class="sort-button" data-field="feedback_description">Sort</button></th>
+                            <th data-sort="creation_date">Date <button class="sort-button" data-field="creation_date">Sort</button></th>
+                            <th data-sort="user">User</th>
+                        </tr>
+                    </thead>
+                    <tbody id="feedbacks-table-body">
+                        <!-- Filled dynamically by JavaScript -->
+                    </tbody>
+                </table>
+                <nav>
+                    <ul class="pagination" id="feedbacks-pagination">
+                        <!-- Pagination links will be added here dynamically by JavaScript -->
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notes Section -->
+    <div class="card shadow-sm mt-4">
+        <div class="card-body">
+            <h3 class="card-title">Notes</h3>
+            <form id="notes-filter-form" method="GET">
+                <div class="form-row">
+                    <div class="col-md-3 mb-3">
+                        <label for="note_project_id">Project ID</label>
+                        <input type="text" class="form-control" name="project_id" id="note_project_id" placeholder="Enter project ID">
+                    </div>
+                    <div class="col-md-3 align-self-end">
+                        <button type="submit" class="btn btn-primary">Filter</button>
+                    </div>
+                </div>
+            </form>
+            <div class="table-responsive">
+                <table class="table table-hover" id="notes-table">
+                    <thead class="thead-light">
+                        <tr>
+                            <th data-sort="note_id">Note ID <button class="sort-button" data-field="note_id">Sort</button></th>
+                            <th data-sort="project_id">Project ID <button class="sort-button" data-field="project_id">Sort</button></th>
+                            <th data-sort="note_description">Description <button class="sort-button" data-field="note_description">Sort</button></th>
+                            <th data-sort="creation_date">Date <button class="sort-button" data-field="creation_date">Sort</button></th>
+                            <th data-sort="sender">Sender</th>
+                            <th data-sort="receiver">Receiver</th>
+                        </tr>
+                    </thead>
+                    <tbody id="notes-table-body">
+                        <!-- Filled dynamically by JavaScript -->
+                    </tbody>
+                </table>
+                <nav>
+                    <ul class="pagination" id="notes-pagination">
+                        <!-- Pagination links will be added here dynamically by JavaScript -->
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </div>
+
+    <!-- Files Section -->
+    <div class="card shadow-sm mt-4 mb-4">
+        <div class="card-body">
+            <h3 class="card-title">Files</h3>
+            <form id="files-filter-form" method="GET">
+                <div class="form-row">
+                    <div class="col-md-3 mb-3">
+                        <label for="file_project_id">Project ID</label>
+                        <input type="text" class="form-control" name="project_id" id="file_project_id" placeholder="Enter project ID">
+                    </div>
+                    <div class="col-md-3 align-self-end">
+                        <button type="submit" class="btn btn-primary">Filter</button>
+                    </div>
+                </div>
+            </form>
+            <div class="table-responsive">
+                <table class="table table-hover" id="files-table">
+                    <thead class="thead-light">
+                        <tr>
+                            <th data-sort="file_ref">File Name</th>
+                            <th data-sort="assign_date">Assigned Date <button class="sort-button" data-field="assign_date">Sort</button></th>
+                            <th data-sort="project_id">Project ID <button class="sort-button" data-field="project_id">Sort</button></th>
+                        </tr>
+                    </thead>
+                    <tbody id="files-table-body">
+                        <!-- Filled dynamically by JavaScript -->
+                    </tbody>
+                </table>
+                <nav>
+                    <ul class="pagination" id="files-pagination">
+                        <!-- Pagination links will be added here dynamically by JavaScript -->
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Custom CSS -->
+<style>
+    .card-title {
+        color: #007bff;
+    }
+    .container {
+        max-width: 1200px;
+    }
+    .sort-arrow:before {
+        content: "▲";
+        display: none;
+    }
+    .sort-arrow.desc:before {
+        content: "▼";
+    }
+    th.asc .sort-arrow:before {
+        display: inline;
+    }
+    th.desc .sort-arrow:before {
+        display: inline;
+    }
+</style>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        console.log("Client details page loaded.");
+        
+        const clientId = window.location.pathname.split("/").pop();
+        fetchClientSummary();
+        let currentPage = {
+            projects: 1,
+            feedbacks: 1,
+            notes: 1,
+            files: 1
+        };
+
+        const perPage = 10;
+        let sortOrder = {
+            projects: { field: "project_id", order: "asc" },
+            feedbacks: { field: "creation_date", order: "asc" },
+            notes: { field: "creation_date", order: "asc" },
+            files: { field: "assign_date", order: "asc" }
+        };
+
+        const endpointMap = {
+            client_files: "files",
+            client_notes: "notes",
+            client_projects: "projects",
+            client_feedbacks: "feedbacks"
+        };
+
+        function fetchClientSummary() {
+            fetch(`/api/client_summary/${clientId}`)
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById("total_projects").textContent = data.total;
+                    document.getElementById("total_budget").textContent = data.total_budget;
+                    document.getElementById("total_feedbacks").textContent = data.total_feedbacks;
+                    document.getElementById("avg_feedback").textContent = data.avg_feedback;
+                    document.getElementById("total_notes").textContent = data.total_notes;
+                    document.getElementById("total_files").textContent = data.total_files;
+                })
+                .catch(error => console.error("Error fetching client summary:", error));
+        }
+
+        function loadTableData(endpoint, params, tableBodyId, paginationId) {
+            fetch(`/api/${endpoint}/${clientId}?` + new URLSearchParams(params))
+                .then(response => response.json())
+                .then(data => {
+                    const dataKey = endpointMap[endpoint];
+                    if (data[dataKey] !== undefined) {
+                        renderTable(data[dataKey], tableBodyId);
+                        renderPagination(data.total, endpoint, paginationId);
+                    } else {
+                        renderTable([], tableBodyId);
+                        renderPagination(0, endpoint, paginationId);
+                    }
+                })
+                .catch(error => console.error("Error fetching data:", error));
+        }
+
+        function renderTable(data, tableBodyId) {
+            const tableBody = document.getElementById(tableBodyId);
+            let html = "";
+
+            if (tableBodyId == "projects-table-body") {
+                data.forEach(item => {
+                    html += "<tr>";
+                    html += `<td><a  href="/manager_project/${item['project_id']}">${item['project_id']}</a></td>`;
+                    html += `<td>${item['project_name']}</td>`;
+                    html += `<td>${item['state']}</td>`;
+                    html += `<td>${item['budget']}</td>`;
+                    html += `<td>${item['creation_date']}</td>`;
+                    html += `<td>${item['deadline_date']}</td>`;
+                    html += `<td>${item['creator_user']}</td>`;
+                    html += "</tr>";
+                });
+            } else if (tableBodyId == "feedbacks-table-body") {
+                data.forEach(item => {
+                    html += "<tr>";
+                    html += `<td>${item['project_id']}</td>`;
+                    html += `<td>${item['rating']}</td>`;
+                    let feed = item['feedback_description'];
+                    html += `<td data-toggle="modal" data-target="#descriptionModal" onclick="showDescription('${feed}')">
+                        ${feed.length > 50 ? feed.substring(0, 50) + "..." : feed}
+                    </td>`;
+                    html += `<td>${item['creation_date']}</td>`;
+                    html += `<td>${item['user']}</td>`;
+                    html += "</tr>";
+                });
+                
+            } else if (tableBodyId == "notes-table-body") {
+                data.forEach(item => {
+                    html += "<tr>";
+                    html += `<td>${item['note_id']}</td>`;
+                    html += `<td>${item['project_id']}</td>`;
+                    let note = item['note_description'];
+                    html += `<td data-toggle="modal" data-target="#descriptionModal" onclick="showDescription('${note}')">
+                        ${note.length > 50 ? note.substring(0, 50) + "..." : note}
+                    </td>`;
+                    html += `<td>${item['creation_date']}</td>`;
+                    html += `<td>${item['sender']}</td>`;
+                    html += `<td>${item['receiver']}</td>`;
+                    html += "</tr>";
+                });
+                
+            } else if (tableBodyId == "files-table-body") {
+                data.forEach(item => {
+                    item['file_name'] = item['file_name'].split("/").pop();
+                    html += "<tr>";
+                    html += `<td>${item['file_name']}</td>`;
+                    html += `<td>${item['assign_date']}</td>`;
+                    html += `<td>${item['project_id']}</td>`;
+                    html += "</tr>";
+                });
+                
+            }
+            tableBody.innerHTML = html;
+        }
+
+        function renderPagination(totalItems, endpoint, paginationId) {
+            const pagination = document.getElementById(paginationId);
+            const totalPages = Math.ceil(totalItems / perPage);
+            let pagesHtml = "";
+
+            for (let i = 1; i <= totalPages; i++) {
+                pagesHtml += `<li class="page-item ${currentPage[endpoint] === i ? "active" : ""}">
+                                <a class="page-link" href="#">${i}</a>
+                              </li>`;
+            }
+
+            pagination.innerHTML = pagesHtml;
+
+            pagination.querySelectorAll(".page-link").forEach((link, index) => {
+                link.addEventListener("click", function(event) {
+                    event.preventDefault();
+                    currentPage[endpointMap[endpoint]] = index + 1;
+                    updateTables();
+                });
+            });
+        }
+
+
+        function applyFilters(formId) {
+            const form = document.getElementById(formId);
+            const filters = {};
+            form.querySelectorAll("input, select").forEach(input => {
+                filters[input.name] = input.value;
+            });
+            return filters;
+        }
+
+        function updateTables() {
+            const projectFilters = applyFilters("projects-filter-form");
+            const feedbackFilters = applyFilters("feedbacks-filter-form");
+            const noteFilters = applyFilters("notes-filter-form");
+            const fileFilters = applyFilters("files-filter-form");
+
+            loadTableData("client_projects", { ...projectFilters, ...sortOrder.projects, page: currentPage.projects }, "projects-table-body", "projects-pagination");
+            loadTableData("client_feedbacks", { ...feedbackFilters, ...sortOrder.feedbacks, page: currentPage.feedbacks }, "feedbacks-table-body", "feedbacks-pagination");
+            loadTableData("client_notes", { ...noteFilters, ...sortOrder.notes, page: currentPage.notes }, "notes-table-body", "notes-pagination");
+            loadTableData("client_files", { ...fileFilters, ...sortOrder.files, page: currentPage.files }, "files-table-body", "files-pagination");
+        }
+
+        document.getElementById("projects-filter-form").addEventListener("submit", function(event) {
+            event.preventDefault();
+            currentPage.projects = 1;
+            updateTables();
+        });
+
+        document.getElementById("feedbacks-filter-form").addEventListener("submit", function(event) {
+            event.preventDefault();
+            currentPage.feedbacks = 1;
+            updateTables();
+        });
+
+        document.getElementById("notes-filter-form").addEventListener("submit", function(event) {
+            event.preventDefault();
+            currentPage.notes = 1;
+            updateTables();
+        });
+
+        document.getElementById("files-filter-form").addEventListener("submit", function(event) {
+            event.preventDefault();
+            currentPage.files = 1;
+            updateTables();
+        });
+
+        document.querySelectorAll(".sort-button").forEach(button => {
+            button.addEventListener("click", function() {
+                const table = button.closest("table").id.replace("-table", "");
+                const sortField = button.getAttribute("data-field");
+
+                sortOrder[table].field = sortField;
+                sortOrder[table].order = sortOrder[table].order === "asc" ? "desc" : "asc";
+
+                updateTables();
+            });
+        });
+
+        updateTables();
+        console.log("Client details page initialized.");
+    });
+
+    function showDescription(description) {
+        document.getElementById("modalDescription").textContent = description;
+    }
+</script>
+{% endblock %}

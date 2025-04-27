@@ -1,0 +1,209 @@
+{% extends "base.html" %}
+
+{% block title %}Project Details{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <!-- Project Summary Report -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <h3 class="card-title">Project Summary</h3>
+            <div class="row">
+                <div class="col-md-4">
+                    <p><strong>Total Feedbacks:</strong> {{ total_feedbacks }}</p>
+                </div>
+                <div class="col-md-4">
+                    <p><strong>Average Rating:</strong> {{ average_rating }}</p>
+                </div>
+                <div class="col-md-4">
+                    <p><strong>Total employees salary:</strong> ${{ total_cost }}</p>
+                </div>
+                <div class="col-md-4">
+                    <p><strong>Total Employees:</strong> {{ total_employees }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Project Details -->
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <h2 class="card-title text-center">{{ project.project_name }}</h2>
+            <div class="row mt-4">
+                <div class="col-md-6">
+                    <p><strong>State:</strong> {{ project.state }}</p>
+                    <p><strong>Budget:</strong> ${{ project.budget }}</p>
+                    <p><strong>Creation Date:</strong> {{ project.creation_date }}</p>
+                    <p><strong>Deadline Date:</strong> {{ project.deadline_date }}</p>
+                </div>
+                <div class="col-md-6">
+                    <p><strong>Creator:</strong><a href="{{ url_for('views.client_detail', client_id=project.creator_user_id) }}" >{{ project.user_name }} ({{ project.user_email }})</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Employees Table -->
+    <div class="card shadow-sm mt-4">
+        <div class="card-body">
+            <h3 class="card-title">Employees</h3>
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>rating</th>
+                        <th>salary</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for employee in employees %}
+                        <tr>
+                            <td><a href = " {{ url_for('views.manager_employee_detail' , employee_id = employee.user_id ) }} " > {{ employee.first_name }} {{ employee.last_name }} </a></td>
+                            <td>{{ employee.user_email }}</td>
+                            <td>{{ employee.rating }}</td>
+                            <td>{{ employee.salary }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+
+
+
+    
+    <!-- Feedbacks Section -->
+    <div class="card shadow-sm mt-4">
+        <div class="card-body">
+            <h3 class="card-title">Feedbacks</h3>
+            <input class="form-control mb-3" id="feedbackFilter" type="text" placeholder="Filter feedbacks...">
+            {% if feedbacks %}
+                <ul class="list-group" id="feedbackList">
+                    {% for feedback in feedbacks %}
+                        <li class="list-group-item">
+                            <h5><strong>{{ feedback.user }}</strong> - Rating: {{ feedback.rating }}</h5>
+                            <p>{{ feedback.feedback_description }}</p>
+                            <small><strong>Date:</strong> {{ feedback.creation_date }}</small>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p>No feedbacks available.</p>
+            {% endif %}
+
+
+
+    <!-- Notes Section -->
+    <div class="card shadow-sm mt-4">
+        <div class="card-body">
+            <h3 class="card-title">Notes</h3>
+            <input class="form-control mb-3" id="noteFilter" type="text" placeholder="Filter notes...">
+            {% if notes %}
+                <ul class="list-group" id="noteList">
+                    {% for note in notes %}
+                        <li class="list-group-item">
+                            <h5><strong>From: {{ note.sender }} <> To: {{ note.receiver }}</strong></h5>
+                            <p>{{ note.note_description }}</p>
+                            <small><strong>Date:</strong> {{ note.creation_date }}</small>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p>No notes available.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Files Section -->
+    <div class="card shadow-sm mt-4">
+        <div class="card-body">
+            <h3 class="card-title">Files</h3>
+            <input class="form-control mb-3" id="fileFilter" type="text" placeholder="Filter files...">
+            {% if files %}
+                <ul class="list-group" id="fileList">
+                    {% for file in files %}
+                        <li class="list-group-item">
+                            <h5><strong><a href="{{ url_for('views.download_file', filename=file.file_ref) }}">{{ file.file_ref }}</a></strong></h5>
+                            <small><strong>Assigned Date:</strong> {{ file.assign_date }}</small>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p>No files available.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Send Note Section -->
+    <div class="card shadow-sm mt-4">
+        <div class="card-body">
+            <h3 class="card-title">Send Note</h3>
+            <form method="POST" action="{{ url_for('views.send_note') }}">
+                <div class="form-group">
+                    <label for="receiver_email">Receiver Email</label>
+                    <input type="email" class="form-control" name="receiver_email" id="receiver_email" required>
+                </div>
+                <input type="hidden" name="project_id" value="{{ project.project_id }}">
+                <div class="form-group">
+                    <label for="note_description">Note</label>
+                    <textarea class="form-control" name="note_description" id="note_description" rows="3" required></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary">Send Note</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add File Section -->
+    <div class="card shadow-sm mt-4 mb-4">
+        <div class="card-body">
+            <h3 class="card-title">Add File to Project</h3>
+            <form method="POST" action="{{ url_for('views.add_file') }}" enctype="multipart/form-data">
+                <input type="hidden" name="project_id" value="{{ project.project_id }}">
+                <div class="form-group">
+                    <label for="file">File</label>
+                    <input type="file" class="form-control-file" name="file" id="file" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Add File</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Custom CSS -->
+<style>
+    .card-title {
+        color: #007bff;
+    }
+    .container {
+        max-width: 900px;
+    }
+</style>
+
+<!-- Custom JavaScript for Filtering -->
+<script>
+    document.getElementById('feedbackFilter').addEventListener('keyup', function() {
+        filterList('feedbackList', this.value);
+    });
+    document.getElementById('noteFilter').addEventListener('keyup', function() {
+        filterList('noteList', this.value);
+    });
+    document.getElementById('fileFilter').addEventListener('keyup', function() {
+        filterList('fileList', this.value);
+    });
+
+    function filterList(listId, filterText) {
+        const list = document.getElementById(listId);
+        const items = list.getElementsByTagName('li');
+        for (let i = 0; i < items.length; i++) {
+            const item = items[i];
+            if (item.textContent.toLowerCase().includes(filterText.toLowerCase())) {
+                item.style.display = '';
+            } else {
+                item.style.display = 'none';
+            }
+        }
+    }
+</script>
+{% endblock %}
